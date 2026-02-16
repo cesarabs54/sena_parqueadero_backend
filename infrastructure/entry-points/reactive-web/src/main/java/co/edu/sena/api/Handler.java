@@ -10,24 +10,19 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class Handler {
-//private  final UseCase useCase;
-//private  final UseCase2 useCase2;
+    private final co.edu.sena.usecase.access.AccessUseCase accessUseCase;
 
-    @PreAuthorize("hasRole('permissionGET')")
-    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
+    public Mono<ServerResponse> handleEntry(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(AccessRequestDTO.class)
+                .flatMap(request -> accessUseCase.registerEntry(request.getPlate(), request.getParkingLotId()))
+                .flatMap(log -> ServerResponse.ok().bodyValue(log))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 
-    @PreAuthorize("hasRole('permissionGETOther')")
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        // useCase2.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
-
-    @PreAuthorize("hasRole('permissionPOST')")
-    public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
+    public Mono<ServerResponse> handleExit(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(AccessRequestDTO.class)
+                .flatMap(request -> accessUseCase.registerExit(request.getPlate(), request.getParkingLotId()))
+                .flatMap(log -> ServerResponse.ok().bodyValue(log))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 }

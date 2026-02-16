@@ -1,10 +1,15 @@
 package co.edu.sena.config;
 
+import co.edu.sena.model.access.gateways.AccessLogRepository;
+import co.edu.sena.model.parking.gateways.ParkingLotRepository;
+import co.edu.sena.model.vehicle.gateways.AuthorizedVehicleRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UseCasesConfigTest {
@@ -22,13 +27,28 @@ class UseCasesConfigTest {
                 }
             }
 
-            assertTrue(useCaseBeanFound, "No beans ending with 'Use Case' were found");
+            assertTrue(useCaseBeanFound, "No beans ending with 'UseCase' were found");
         }
     }
 
     @Configuration
     @Import(UseCasesConfig.class)
     static class TestConfig {
+
+        @Bean
+        public AccessLogRepository accessLogRepository() {
+            return Mockito.mock(AccessLogRepository.class);
+        }
+
+        @Bean
+        public AuthorizedVehicleRepository authorizedVehicleRepository() {
+            return Mockito.mock(AuthorizedVehicleRepository.class);
+        }
+
+        @Bean
+        public ParkingLotRepository parkingLotRepository() {
+            return Mockito.mock(ParkingLotRepository.class);
+        }
 
         @Bean
         public MyUseCase myUseCase() {

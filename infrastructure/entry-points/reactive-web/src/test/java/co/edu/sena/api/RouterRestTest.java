@@ -1,60 +1,81 @@
 package co.edu.sena.api;
 
-import org.assertj.core.api.Assertions;
+import co.edu.sena.model.access.AccessLog;
+import co.edu.sena.usecase.access.AccessUseCase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
-@WebFluxTest
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { RouterRest.class, Handler.class })
 class RouterRestTest {
 
-    @Autowired
-    private WebTestClient webTestClient;
+        @Autowired
+        private RouterFunction<ServerResponse> routerFunction;
 
-    @Test
-    void testListenGETUseCase() {
-        webTestClient.get()
-                .uri("/api/usecase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
-    }
+        private WebTestClient webTestClient;
 
-    @Test
-    void testListenGETOtherUseCase() {
-        webTestClient.get()
-                .uri("/api/otherusercase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
-    }
+        @MockitoBean
+        private AccessUseCase accessUseCase;
 
-    @Test
-    void testListenPOSTUseCase() {
-        webTestClient.post()
-                .uri("/api/usecase/otherpath")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue("")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
-    }
+        @BeforeEach
+        void setUp() {
+                webTestClient = WebTestClient.bindToRouterFunction(routerFunction).build();
+        }
+
+        @Test
+        void testRegisterEntry() {
+                AccessLog log = AccessLog.builder()
+                                .plate("ABC123")
+                                .parkingLotId(UUID.randomUUID())
+                                .build();
+
+                when(accessUseCase.registerEntry(any(), any()))
+                                .thenReturn(Mono.just(log));
+
+                webTestClient.post()
+                                .uri("/api/access/entry")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .bodyValue(new AccessRequestDTO("ABC123", UUID.randomUUID()))
+                                .exchange()
+                                .expectStatus().isOk()
+                                .expectBody()
+                                .jsonPath("$.plate").isEqualTo("ABC123");
+        }
+
+        @Test
+        void testRegisterExit() {
+                AccessLog log = AccessLog.builder()
+                                .plate("ABC123")
+                                .parkingLotId(UUID.randomUUID())
+                                .build();
+
+                when(accessUseCase.registerExit(any(), any()))
+                                .thenReturn(Mono.just(log));
+
+                webTestClient.post()
+                                .uri("/api/access/exit")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .bodyValue(new AccessRequestDTO("ABC123", UUID.randomUUID()))
+                                .exchange()
+                                .expectStatus().isOk()
+                                .expectBody()
+                                .jsonPath("$.plate").isEqualTo("ABC123");
+        }
 }
