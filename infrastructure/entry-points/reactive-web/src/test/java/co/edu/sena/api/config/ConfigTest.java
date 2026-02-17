@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import co.edu.sena.api.Handler;
 import co.edu.sena.api.RouterRest;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -30,11 +29,9 @@ class ConfigTest {
         );
 
         RouterRest routerRest = new RouterRest();
-        CorsConfig corsConfig = new CorsConfig();
         SecurityHeadersConfig securityHeadersConfig = new SecurityHeadersConfig();
 
         webTestClient = WebTestClient.bindToRouterFunction(routerRest.routerFunction(handler))
-                .webFilter(corsConfig.corsWebFilter(List.of("http://localhost:3000")))
                 .webFilter(securityHeadersConfig)
                 .build();
     }

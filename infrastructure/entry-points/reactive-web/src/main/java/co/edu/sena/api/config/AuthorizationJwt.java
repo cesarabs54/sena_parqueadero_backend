@@ -1,5 +1,9 @@
 package co.edu.sena.api.config;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +12,8 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CorsSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -22,12 +28,6 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import reactor.core.publisher.Mono;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration
@@ -55,8 +55,8 @@ public class AuthorizationJwt implements WebFluxConfigurer {
 
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
-        http
-            .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
+        http.csrf(CsrfSpec::disable).cors(CorsSpec::disable)
+                .authorizeExchange(authorize -> authorize.anyExchange().permitAll())
             .oauth2ResourceServer(oauth2 ->
                     oauth2.jwt(jwtSpec ->
                             jwtSpec

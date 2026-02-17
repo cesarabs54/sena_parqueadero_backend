@@ -30,8 +30,10 @@ public class UseCasesConfig {
 
         @Bean
         public co.edu.sena.usecase.parking.ManageParkingLotUseCase manageParkingLotUseCase(
-                ParkingLotRepository parkingLotRepository) {
+                ParkingLotRepository parkingLotRepository,
+                AccessUseCase accessUseCase) {
                 return new co.edu.sena.usecase.parking.ManageParkingLotUseCase(
-                        parkingLotRepository);
+                        parkingLotRepository,
+                        accessUseCase);
         }
 }

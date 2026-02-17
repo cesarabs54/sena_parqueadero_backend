@@ -27,8 +27,14 @@ public class ParkingLotAdapter implements ParkingLotRepository {
     }
 
     @Override
-    public Mono<ParkingLot> save(ParkingLot parkingLot) {
-        return repository.save(toEntity(parkingLot))
+    public Mono<ParkingLot> create(ParkingLot parkingLot) {
+        return repository.save(toEntity(parkingLot).toBuilder().newRecord(true).build())
+                .map(this::toDomain);
+    }
+
+    @Override
+    public Mono<ParkingLot> update(ParkingLot parkingLot) {
+        return repository.save(toEntity(parkingLot).toBuilder().newRecord(false).build())
                 .map(this::toDomain);
     }
 
@@ -38,6 +44,7 @@ public class ParkingLotAdapter implements ParkingLotRepository {
                 .name(entity.getName())
                 .capacity(entity.getCapacity())
                 .address(entity.getAddress())
+                .occupied(0)
                 .build();
     }
 
