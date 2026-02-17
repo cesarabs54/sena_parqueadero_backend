@@ -57,4 +57,12 @@ public class AccessUseCase {
                 .parkingLotId(parkingLotId)
                 .build());
     }
+
+  public Mono<Long> getOccupancy(UUID parkingLotId) {
+    return Mono.zip(
+                    accessLogRepository.countByParkingLotIdAndType(parkingLotId,
+                            AccessLog.AccessType.ENTRY),
+                    accessLogRepository.countByParkingLotIdAndType(parkingLotId, AccessLog.AccessType.EXIT))
+            .map(tuple -> tuple.getT1() - tuple.getT2());
+  }
 }

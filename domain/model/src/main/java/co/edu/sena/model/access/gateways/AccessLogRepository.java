@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono;
 public interface AccessLogRepository {
 
     Mono<AccessLog> save(AccessLog accessLog);
+
+  Mono<Long> countByParkingLotIdAndType(java.util.UUID parkingLotId, AccessLog.AccessType type);
 }

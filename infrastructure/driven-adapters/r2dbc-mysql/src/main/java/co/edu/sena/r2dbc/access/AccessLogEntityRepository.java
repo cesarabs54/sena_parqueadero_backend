@@ -5,4 +5,6 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 public interface AccessLogEntityRepository extends ReactiveCrudRepository<AccessLogEntity, UUID> {
 
+    reactor.core.publisher.Mono<Long> countByParkingLotIdAndType(UUID parkingLotId,
+            co.edu.sena.model.access.AccessLog.AccessType type);
 }

@@ -5,4 +5,5 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 public interface AuthorizedVehicleEntityRepository extends
         ReactiveCrudRepository<AuthorizedVehicleEntity, String> {
 
+    reactor.core.publisher.Mono<Void> deleteByPlate(String plate);
 }

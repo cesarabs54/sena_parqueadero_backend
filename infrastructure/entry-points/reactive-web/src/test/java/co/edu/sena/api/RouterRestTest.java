@@ -1,7 +1,11 @@
 package co.edu.sena.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import co.edu.sena.model.access.AccessLog;
 import co.edu.sena.usecase.access.AccessUseCase;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +19,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { RouterRest.class, Handler.class })
 class RouterRestTest {
@@ -31,6 +30,9 @@ class RouterRestTest {
 
         @MockitoBean
         private AccessUseCase accessUseCase;
+
+        @MockitoBean
+        private co.edu.sena.usecase.vehicle.ManageVehiclesUseCase manageVehiclesUseCase;
 
         @BeforeEach
         void setUp() {

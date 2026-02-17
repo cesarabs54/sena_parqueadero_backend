@@ -37,4 +37,10 @@ public class AccessLogAdapter implements AccessLogRepository {
                 .parkingLotId(accessLog.getParkingLotId())
                 .build();
     }
+
+    @Override
+    public Mono<Long> countByParkingLotIdAndType(java.util.UUID parkingLotId,
+            AccessLog.AccessType type) {
+        return repository.countByParkingLotIdAndType(parkingLotId, type);
+    }
 }

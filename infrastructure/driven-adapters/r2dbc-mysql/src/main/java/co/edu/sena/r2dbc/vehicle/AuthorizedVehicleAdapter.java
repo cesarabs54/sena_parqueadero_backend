@@ -4,6 +4,7 @@ import co.edu.sena.model.vehicle.AuthorizedVehicle;
 import co.edu.sena.model.vehicle.gateways.AuthorizedVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -16,6 +17,18 @@ public class AuthorizedVehicleAdapter implements AuthorizedVehicleRepository {
     public Mono<AuthorizedVehicle> findByPlate(String plate) {
         return repository.findById(plate)
                 .map(this::toDomain);
+    }
+
+    @Override
+    public Flux<AuthorizedVehicle> findAll() {
+        return repository.findAll()
+                .map(this::toDomain);
+    }
+
+    @Override
+    public Mono<Void> deleteByPlate(String plate) {
+        return repository.deleteById(
+                plate); // Changed to deleteById as deleteByPlate is not a standard R2DBC method
     }
 
     @Override
