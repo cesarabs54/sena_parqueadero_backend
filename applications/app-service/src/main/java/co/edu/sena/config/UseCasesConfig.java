@@ -27,4 +27,11 @@ public class UseCasesConfig {
                 AuthorizedVehicleRepository authorizedVehicleRepository) {
                 return new ManageVehiclesUseCase(authorizedVehicleRepository);
         }
+
+        @Bean
+        public co.edu.sena.usecase.parking.ManageParkingLotUseCase manageParkingLotUseCase(
+                ParkingLotRepository parkingLotRepository) {
+                return new co.edu.sena.usecase.parking.ManageParkingLotUseCase(
+                        parkingLotRepository);
+        }
 }

@@ -52,4 +52,34 @@ public class Handler {
                 .then(ServerResponse.ok().build())
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
+
+    // Admin Panel
+    public Mono<ServerResponse> getAccessLogs(ServerRequest serverRequest) {
+        return ServerResponse.ok()
+                .body(accessUseCase.getAllAccessLogs(), co.edu.sena.model.access.AccessLog.class);
+    }
+
+    private final co.edu.sena.usecase.parking.ManageParkingLotUseCase manageParkingLotUseCase;
+
+    public Mono<ServerResponse> getAllParkingLots(ServerRequest serverRequest) {
+        return ServerResponse.ok().body(manageParkingLotUseCase.getAllParkingLots(),
+                co.edu.sena.model.parking.ParkingLot.class);
+    }
+
+    public Mono<ServerResponse> updateParkingLot(ServerRequest serverRequest) {
+        String id = serverRequest.pathVariable("id");
+        return serverRequest.bodyToMono(co.edu.sena.model.parking.ParkingLot.class)
+                .flatMap(parkingLot -> manageParkingLotUseCase.updateParkingLot(
+                        java.util.UUID.fromString(id),
+                        parkingLot))
+                .flatMap(updated -> ServerResponse.ok().bodyValue(updated))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
+
+    public Mono<ServerResponse> createParkingLot(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(co.edu.sena.model.parking.ParkingLot.class)
+                .flatMap(manageParkingLotUseCase::createParkingLot)
+                .flatMap(created -> ServerResponse.ok().bodyValue(created))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
 }

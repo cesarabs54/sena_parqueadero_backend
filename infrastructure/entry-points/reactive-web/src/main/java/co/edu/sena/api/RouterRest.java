@@ -20,6 +20,14 @@ public class RouterRest {
                 // Vehicle Management
                 .andRoute(POST("/api/vehicles"), handler::createVehicle)
                 .andRoute(GET("/api/vehicles"), handler::getAllVehicles)
-                .andRoute(DELETE("/api/vehicles/{plate}"), handler::deleteVehicle);
+                .andRoute(DELETE("/api/vehicles/{plate}"), handler::deleteVehicle)
+                // Admin Panel
+                .andRoute(GET("/api/access/logs"), handler::getAccessLogs)
+                .andRoute(GET("/api/parking-lot"), handler::getAllParkingLots) // Listing zones
+                .andRoute(POST("/api/parking-lot"), handler::createParkingLot) // New zone
+                .andRoute(
+                        org.springframework.web.reactive.function.server.RequestPredicates.PUT(
+                                "/api/parking-lot/{id}"),
+                        handler::updateParkingLot);
     }
 }

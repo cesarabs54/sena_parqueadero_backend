@@ -18,6 +18,12 @@ public class AccessLogAdapter implements AccessLogRepository {
                 .map(this::toDomain);
     }
 
+    @Override
+    public reactor.core.publisher.Flux<AccessLog> findAll() {
+        return repository.findAll()
+                .map(this::toDomain);
+    }
+
     private AccessLog toDomain(AccessLogEntity entity) {
         return AccessLog.builder()
                 .id(entity.getId())

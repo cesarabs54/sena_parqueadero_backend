@@ -58,11 +58,14 @@ public class AccessUseCase {
                 .build());
     }
 
-  public Mono<Long> getOccupancy(UUID parkingLotId) {
-    return Mono.zip(
-                    accessLogRepository.countByParkingLotIdAndType(parkingLotId,
-                            AccessLog.AccessType.ENTRY),
-                    accessLogRepository.countByParkingLotIdAndType(parkingLotId, AccessLog.AccessType.EXIT))
+  public Mono<Long> getOccupancy(java.util.UUID parkingLotId) {
+    return accessLogRepository.countByParkingLotIdAndType(parkingLotId, AccessLog.AccessType.ENTRY)
+            .zipWith(accessLogRepository.countByParkingLotIdAndType(parkingLotId,
+                    AccessLog.AccessType.EXIT))
             .map(tuple -> tuple.getT1() - tuple.getT2());
+  }
+
+  public reactor.core.publisher.Flux<AccessLog> getAllAccessLogs() {
+    return accessLogRepository.findAll();
   }
 }
