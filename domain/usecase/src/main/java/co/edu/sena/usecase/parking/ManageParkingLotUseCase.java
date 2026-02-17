@@ -2,16 +2,13 @@ package co.edu.sena.usecase.parking;
 
 import co.edu.sena.model.parking.ParkingLot;
 import co.edu.sena.model.parking.gateways.ParkingLotRepository;
+import co.edu.sena.usecase.access.AccessUseCase;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
-public class ManageParkingLotUseCase {
-
-  private final ParkingLotRepository parkingLotRepository;
-  private final co.edu.sena.usecase.access.AccessUseCase accessUseCase;
+public record ManageParkingLotUseCase(ParkingLotRepository parkingLotRepository,
+                                      AccessUseCase accessUseCase) {
 
   public Mono<ParkingLot> createParkingLot(ParkingLot parkingLot) {
     return parkingLotRepository.create(parkingLot.toBuilder().id(UUID.randomUUID()).build());

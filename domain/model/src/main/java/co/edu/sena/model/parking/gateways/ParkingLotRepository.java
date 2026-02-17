@@ -11,7 +11,7 @@ public interface ParkingLotRepository {
 
     Flux<ParkingLot> findAll();
 
-  Mono<ParkingLot> create(ParkingLot parkingLot);
+    Mono<ParkingLot> create(ParkingLot parkingLot);
 
-  Mono<ParkingLot> update(ParkingLot parkingLot);
+    Mono<ParkingLot> update(ParkingLot parkingLot);
 }

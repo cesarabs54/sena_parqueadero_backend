@@ -1,5 +1,7 @@
 package co.edu.sena.api;
 
+import co.edu.sena.usecase.access.AccessUseCase;
+import co.edu.sena.usecase.vehicle.ManageVehiclesUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -9,19 +11,22 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class Handler {
-    private final co.edu.sena.usecase.access.AccessUseCase accessUseCase;
-    private final co.edu.sena.usecase.vehicle.ManageVehiclesUseCase manageVehiclesUseCase;
+
+    private final AccessUseCase accessUseCase;
+    private final ManageVehiclesUseCase manageVehiclesUseCase;
 
     public Mono<ServerResponse> handleEntry(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(AccessRequestDTO.class)
-                .flatMap(request -> accessUseCase.registerEntry(request.getPlate(), request.getParkingLotId()))
+                .flatMap(request -> accessUseCase.registerEntry(request.plate(),
+                        request.parkingLotId()))
                 .flatMap(log -> ServerResponse.ok().bodyValue(log))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 
     public Mono<ServerResponse> handleExit(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(AccessRequestDTO.class)
-                .flatMap(request -> accessUseCase.registerExit(request.getPlate(), request.getParkingLotId()))
+                .flatMap(request -> accessUseCase.registerExit(request.plate(),
+                        request.parkingLotId()))
                 .flatMap(log -> ServerResponse.ok().bodyValue(log))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }

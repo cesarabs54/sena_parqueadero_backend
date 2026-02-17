@@ -1,20 +1,21 @@
 package co.edu.sena.usecase.access;
 
 import co.edu.sena.model.access.AccessLog;
+import co.edu.sena.model.access.AccessLog.AccessType;
+import co.edu.sena.model.access.VehicleStatus;
 import co.edu.sena.model.access.gateways.AccessLogRepository;
 import co.edu.sena.model.parking.gateways.ParkingLotRepository;
 import co.edu.sena.model.vehicle.gateways.AuthorizedVehicleRepository;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
-public class AccessUseCase {
-
-    private final AccessLogRepository accessLogRepository;
-    private final AuthorizedVehicleRepository authorizedVehicleRepository;
-    private final ParkingLotRepository parkingLotRepository;
+public record AccessUseCase(AccessLogRepository accessLogRepository,
+                            AuthorizedVehicleRepository authorizedVehicleRepository,
+                            ParkingLotRepository parkingLotRepository) {
 
     public Mono<AccessLog> registerEntry(String plate, UUID parkingLotId) {
         LocalDateTime now = LocalDateTime.now();
@@ -25,12 +26,12 @@ public class AccessUseCase {
                     if (Boolean.FALSE.equals(vehicle.getIsActive())) {
                         return Mono.error(new RuntimeException("Vehicle authorized but inactive"));
                     }
-                    return createAccessLog(plate, parkingLotId, AccessLog.AccessType.ENTRY);
+                    return createAccessLog(plate, parkingLotId, AccessType.ENTRY);
                 })
                 .switchIfEmpty(Mono.defer(() -> {
                     if (isWeekend(now)) {
                         // Allow non-authorized vehicles on weekends (example rule)
-                        return createAccessLog(plate, parkingLotId, AccessLog.AccessType.ENTRY);
+                        return createAccessLog(plate, parkingLotId, AccessType.ENTRY);
                     } else {
                         return Mono.error(
                                 new RuntimeException("Vehicle not authorized for weekday access"));
@@ -40,16 +41,16 @@ public class AccessUseCase {
 
     private boolean isWeekend(LocalDateTime dateTime) {
         var day = dateTime.getDayOfWeek();
-        return day == java.time.DayOfWeek.SATURDAY || day == java.time.DayOfWeek.SUNDAY;
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
 
     public Mono<AccessLog> registerExit(String plate, UUID parkingLotId) {
-        return createAccessLog(plate, parkingLotId, AccessLog.AccessType.EXIT);
+        return createAccessLog(plate, parkingLotId, AccessType.EXIT);
     }
 
     private Mono<AccessLog> createAccessLog(String plate, UUID parkingLotId,
-            AccessLog.AccessType type) {
-        return accessLogRepository.save(AccessLog.builder()
+            AccessType type) {
+        return accessLogRepository.create(AccessLog.builder()
                 .id(UUID.randomUUID())
                 .plate(plate)
                 .timestamp(LocalDateTime.now())
@@ -58,29 +59,29 @@ public class AccessUseCase {
                 .build());
     }
 
-  public Mono<Long> getOccupancy(java.util.UUID parkingLotId) {
-    return accessLogRepository.countByParkingLotIdAndType(parkingLotId, AccessLog.AccessType.ENTRY)
-            .zipWith(accessLogRepository.countByParkingLotIdAndType(parkingLotId,
-                    AccessLog.AccessType.EXIT))
-            .map(tuple -> tuple.getT1() - tuple.getT2());
-  }
+    public Mono<Long> getOccupancy(UUID parkingLotId) {
+        return accessLogRepository.countByParkingLotIdAndType(parkingLotId, AccessType.ENTRY)
+                .zipWith(accessLogRepository.countByParkingLotIdAndType(parkingLotId,
+                        AccessType.EXIT))
+                .map(tuple -> tuple.getT1() - tuple.getT2());
+    }
 
-  public reactor.core.publisher.Flux<AccessLog> getAllAccessLogs() {
-    return accessLogRepository.findAll();
-  }
+    public Flux<AccessLog> getAllAccessLogs() {
+        return accessLogRepository.findAll();
+    }
 
-  public Mono<co.edu.sena.model.access.VehicleStatus> getVehicleStatus(String plate) {
-    return accessLogRepository.findLastByPlate(plate)
-            .map(log -> log.getType() == AccessLog.AccessType.ENTRY ? "IN" : "OUT")
-            .defaultIfEmpty("OUT")
-            .zipWith(authorizedVehicleRepository.findByPlate(plate)
-                    .map(v -> java.util.Map.entry(true, v.getOwnerName()))
-                    .defaultIfEmpty(java.util.Map.entry(false, "Visitante")))
-            .map(tuple -> co.edu.sena.model.access.VehicleStatus.builder()
-                    .plate(plate)
-                    .currentStatus(tuple.getT1())
-                    .isAuthorized(tuple.getT2().getKey())
-                    .ownerName(tuple.getT2().getValue())
-                    .build());
-  }
+    public Mono<VehicleStatus> getVehicleStatus(String plate) {
+        return accessLogRepository.findLastByPlate(plate)
+                .map(log -> log.getType() == AccessType.ENTRY ? "IN" : "OUT")
+                .defaultIfEmpty("OUT")
+                .zipWith(authorizedVehicleRepository.findByPlate(plate)
+                        .map(v -> Map.entry(true, v.getOwnerName()))
+                        .defaultIfEmpty(Map.entry(false, "Visitante")))
+                .map(tuple -> VehicleStatus.builder()
+                        .plate(plate)
+                        .currentStatus(tuple.getT1())
+                        .isAuthorized(tuple.getT2().getKey())
+                        .ownerName(tuple.getT2().getValue())
+                        .build());
+    }
 }

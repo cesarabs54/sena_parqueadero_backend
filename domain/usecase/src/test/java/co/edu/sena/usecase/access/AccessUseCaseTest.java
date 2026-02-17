@@ -32,11 +32,12 @@ class AccessUseCaseTest {
     @InjectMocks
     private AccessUseCase accessUseCase;
 
-    private UUID parkingLotId = UUID.randomUUID();
-    private String plate = "ABC123";
+    private final UUID parkingLotId = UUID.randomUUID();
+    private final String plate = "ABC123";
 
     @BeforeEach
     void setUp() {
+        // document why this method is empty
     }
 
     @Test
@@ -46,7 +47,7 @@ class AccessUseCaseTest {
         when(authorizedVehicleRepository.findByPlate(plate))
                 .thenReturn(
                         Mono.just(AuthorizedVehicle.builder().plate(plate).isActive(true).build()));
-        when(accessLogRepository.save(any())).thenReturn(
+        when(accessLogRepository.create(any())).thenReturn(
                 Mono.just(AccessLog.builder().plate(plate).build()));
 
         StepVerifier.create(accessUseCase.registerEntry(plate, parkingLotId))

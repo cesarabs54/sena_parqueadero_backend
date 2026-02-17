@@ -1,15 +1,7 @@
 package co.edu.sena.api;
 
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class AccessRequestDTO {
+public record AccessRequestDTO(String plate, UUID parkingLotId) {
 
-    private String plate;
-    private UUID parkingLotId;
 }

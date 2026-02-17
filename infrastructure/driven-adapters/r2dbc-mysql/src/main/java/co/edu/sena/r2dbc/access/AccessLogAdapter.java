@@ -2,8 +2,10 @@ package co.edu.sena.r2dbc.access;
 
 import co.edu.sena.model.access.AccessLog;
 import co.edu.sena.model.access.gateways.AccessLogRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -13,13 +15,19 @@ public class AccessLogAdapter implements AccessLogRepository {
     private final AccessLogEntityRepository repository;
 
     @Override
-    public Mono<AccessLog> save(AccessLog accessLog) {
-        return repository.save(toEntity(accessLog))
+    public Mono<AccessLog> create(AccessLog accessLog) {
+        return repository.save(toEntity(accessLog).toBuilder().newRecord(true).build())
                 .map(this::toDomain);
     }
 
     @Override
-    public reactor.core.publisher.Flux<AccessLog> findAll() {
+    public Mono<AccessLog> update(AccessLog accessLog) {
+        return repository.save(toEntity(accessLog).toBuilder().newRecord(false).build())
+                .map(this::toDomain);
+    }
+
+    @Override
+    public Flux<AccessLog> findAll() {
         return repository.findAll()
                 .map(this::toDomain);
     }
@@ -45,7 +53,7 @@ public class AccessLogAdapter implements AccessLogRepository {
     }
 
     @Override
-    public Mono<Long> countByParkingLotIdAndType(java.util.UUID parkingLotId,
+    public Mono<Long> countByParkingLotIdAndType(UUID parkingLotId,
             AccessLog.AccessType type) {
         return repository.countByParkingLotIdAndType(parkingLotId, type);
     }

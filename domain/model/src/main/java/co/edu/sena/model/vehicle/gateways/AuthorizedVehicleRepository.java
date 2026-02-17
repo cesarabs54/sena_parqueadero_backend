@@ -10,7 +10,7 @@ public interface AuthorizedVehicleRepository {
 
     Mono<AuthorizedVehicle> save(AuthorizedVehicle vehicle);
 
-  Flux<AuthorizedVehicle> findAll();
+    Flux<AuthorizedVehicle> findAll();
 
-  Mono<Void> deleteByPlate(String plate);
+    Mono<Void> deleteByPlate(String plate);
 }

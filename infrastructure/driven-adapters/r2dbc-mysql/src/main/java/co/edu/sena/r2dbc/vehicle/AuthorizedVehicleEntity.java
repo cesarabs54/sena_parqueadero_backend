@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -13,7 +16,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorizedVehicleEntity {
+public class AuthorizedVehicleEntity implements Persistable<String> {
 
     @Id
     private String plate;
@@ -21,4 +24,19 @@ public class AuthorizedVehicleEntity {
     private String ownerName;
     @Column("is_active")
     private Boolean isActive;
+
+
+    @Transient
+    @Builder.Default
+    private boolean newRecord = false;
+
+    @Override
+    public @Nullable String getId() {
+        return plate;
+    }
+
+    @Override
+    public boolean isNew() {
+        return newRecord;
+    }
 }
