@@ -12,10 +12,12 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class RouterRest {
+
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/access/entry"), handler::handleEntry)
-                .andRoute(POST("/api/access/exit"), handler::handleExit)
+                .andRoute(POST("/api/exit"), handler::handleExit)
+                .andRoute(GET("/api/access/status/{plate}"), handler::handleVehicleStatus)
                 .andRoute(GET("/api/access/occupancy/{id}"), handler::handleOccupancy)
                 // Vehicle Management
                 .andRoute(POST("/api/vehicles"), handler::createVehicle)

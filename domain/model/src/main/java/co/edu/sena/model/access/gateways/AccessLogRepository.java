@@ -10,4 +10,6 @@ public interface AccessLogRepository {
   reactor.core.publisher.Flux<AccessLog> findAll();
 
   Mono<Long> countByParkingLotIdAndType(java.util.UUID parkingLotId, AccessLog.AccessType type);
+
+  Mono<AccessLog> findLastByPlate(String plate);
 }

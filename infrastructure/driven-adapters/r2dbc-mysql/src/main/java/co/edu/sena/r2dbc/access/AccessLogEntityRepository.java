@@ -7,4 +7,6 @@ public interface AccessLogEntityRepository extends ReactiveCrudRepository<Access
 
     reactor.core.publisher.Mono<Long> countByParkingLotIdAndType(UUID parkingLotId,
             co.edu.sena.model.access.AccessLog.AccessType type);
+
+    reactor.core.publisher.Mono<AccessLogEntity> findFirstByPlateOrderByTimestampDesc(String plate);
 }

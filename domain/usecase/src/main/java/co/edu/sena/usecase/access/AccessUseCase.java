@@ -68,4 +68,19 @@ public class AccessUseCase {
   public reactor.core.publisher.Flux<AccessLog> getAllAccessLogs() {
     return accessLogRepository.findAll();
   }
+
+  public Mono<co.edu.sena.model.access.VehicleStatus> getVehicleStatus(String plate) {
+    return accessLogRepository.findLastByPlate(plate)
+            .map(log -> log.getType() == AccessLog.AccessType.ENTRY ? "IN" : "OUT")
+            .defaultIfEmpty("OUT")
+            .zipWith(authorizedVehicleRepository.findByPlate(plate)
+                    .map(v -> java.util.Map.entry(true, v.getOwnerName()))
+                    .defaultIfEmpty(java.util.Map.entry(false, "Visitante")))
+            .map(tuple -> co.edu.sena.model.access.VehicleStatus.builder()
+                    .plate(plate)
+                    .currentStatus(tuple.getT1())
+                    .isAuthorized(tuple.getT2().getKey())
+                    .ownerName(tuple.getT2().getValue())
+                    .build());
+  }
 }

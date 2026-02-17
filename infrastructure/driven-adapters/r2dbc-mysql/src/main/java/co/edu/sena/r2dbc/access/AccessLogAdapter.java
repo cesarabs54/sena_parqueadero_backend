@@ -49,4 +49,10 @@ public class AccessLogAdapter implements AccessLogRepository {
             AccessLog.AccessType type) {
         return repository.countByParkingLotIdAndType(parkingLotId, type);
     }
+
+    @Override
+    public Mono<AccessLog> findLastByPlate(String plate) {
+        return repository.findFirstByPlateOrderByTimestampDesc(plate)
+                .map(this::toDomain);
+    }
 }

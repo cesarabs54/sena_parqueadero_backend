@@ -33,6 +33,13 @@ public class Handler {
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 
+    public Mono<ServerResponse> handleVehicleStatus(ServerRequest serverRequest) {
+        String plate = serverRequest.pathVariable("plate");
+        return accessUseCase.getVehicleStatus(plate)
+                .flatMap(status -> ServerResponse.ok().bodyValue(status))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
+
     // Vehicle Management
     public Mono<ServerResponse> createVehicle(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(co.edu.sena.model.vehicle.AuthorizedVehicle.class)

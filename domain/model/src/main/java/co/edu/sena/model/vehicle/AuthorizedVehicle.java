@@ -1,13 +1,17 @@
 package co.edu.sena.model.vehicle;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthorizedVehicle {
 
-    private final String plate;
-    private final String ownerName;
-    private final Boolean isActive;
+  private String plate;
+  private String ownerName;
+  private Boolean isActive;
 }
