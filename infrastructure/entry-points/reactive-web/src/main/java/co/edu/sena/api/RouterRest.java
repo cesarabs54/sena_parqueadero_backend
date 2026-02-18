@@ -17,9 +17,11 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/access/entry"), handler::handleEntry)
-                .andRoute(POST("/api/exit"), handler::handleExit)
+                .andRoute(POST("/api/access/exit"), handler::handleExit)
+                .andRoute(POST("/api/access/rejection"), handler::handleRejection)
                 .andRoute(GET("/api/access/status/{plate}"), handler::handleVehicleStatus)
                 .andRoute(GET("/api/access/occupancy/{id}"), handler::handleOccupancy)
+                .andRoute(GET("/api/users/{plate}"), handler::getUserByPlate)
                 // Vehicle Management
                 .andRoute(POST("/api/vehicles"), handler::createVehicle)
                 .andRoute(GET("/api/vehicles"), handler::getAllVehicles)

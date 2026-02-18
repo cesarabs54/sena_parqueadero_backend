@@ -14,8 +14,10 @@ public class AccessLog {
     private final LocalDateTime timestamp;
     private final AccessType type;
     private final UUID parkingLotId;
+    private final String comments;
+    private final String userType; // AUTHORIZED, VISITOR
 
     public enum AccessType {
-        ENTRY, EXIT
+        ENTRY, EXIT, REJECTED
     }
 }

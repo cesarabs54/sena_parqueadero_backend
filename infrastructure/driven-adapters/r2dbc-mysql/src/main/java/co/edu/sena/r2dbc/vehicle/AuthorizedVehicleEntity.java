@@ -1,5 +1,6 @@
 package co.edu.sena.r2dbc.vehicle;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,27 +17,52 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorizedVehicleEntity implements Persistable<String> {
+public class AuthorizedVehicleEntity implements Persistable<UUID> {
 
     @Id
+    private UUID id;
+
     private String plate;
-    @Column("owner_name")
-    private String ownerName;
+
+    @Column("document_type")
+    private String documentType;
+
+    @Column("document_number")
+    private String documentNumber;
+
+    @Column("first_name")
+    private String firstName;
+
+    @Column("last_name")
+    private String lastName;
+
+    @Column("vehicle_type")
+    private String vehicleType;
+
+    @Column("contract_type")
+    private String contractType;
+
+    @Column("job_title")
+    private String jobTitle;
+
+    private String email;
+
+    private String contact;
+
     @Column("is_active")
     private Boolean isActive;
-
 
     @Transient
     @Builder.Default
     private boolean newRecord = false;
 
     @Override
-    public @Nullable String getId() {
-        return plate;
+    public @Nullable UUID getId() {
+        return id;
     }
 
     @Override
     public boolean isNew() {
-        return newRecord;
+        return newRecord || id == null;
     }
 }

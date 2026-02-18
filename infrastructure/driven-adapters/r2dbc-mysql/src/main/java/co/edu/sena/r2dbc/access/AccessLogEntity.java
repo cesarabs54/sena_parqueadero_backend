@@ -28,6 +28,9 @@ public class AccessLogEntity implements Persistable<UUID> {
     private AccessLog.AccessType type;
     @Column("parking_lot_id")
     private UUID parkingLotId;
+    private String comments;
+    @Column("user_type")
+    private String userType;
 
     @Transient
     @Builder.Default

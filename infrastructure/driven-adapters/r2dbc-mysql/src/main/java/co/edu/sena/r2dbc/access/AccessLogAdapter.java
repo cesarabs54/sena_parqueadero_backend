@@ -39,6 +39,8 @@ public class AccessLogAdapter implements AccessLogRepository {
                 .timestamp(entity.getTimestamp())
                 .type(entity.getType())
                 .parkingLotId(entity.getParkingLotId())
+                .comments(entity.getComments())
+                .userType(entity.getUserType())
                 .build();
     }
 
@@ -49,6 +51,8 @@ public class AccessLogAdapter implements AccessLogRepository {
                 .timestamp(accessLog.getTimestamp())
                 .type(accessLog.getType())
                 .parkingLotId(accessLog.getParkingLotId())
+                .comments(accessLog.getComments())
+                .userType(accessLog.getUserType())
                 .build();
     }
 

@@ -14,11 +14,12 @@ public class Handler {
 
     private final AccessUseCase accessUseCase;
     private final ManageVehiclesUseCase manageVehiclesUseCase;
+    private final co.edu.sena.usecase.parking.ManageParkingLotUseCase manageParkingLotUseCase;
 
     public Mono<ServerResponse> handleEntry(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(AccessRequestDTO.class)
                 .flatMap(request -> accessUseCase.registerEntry(request.plate(),
-                        request.parkingLotId()))
+                        request.parkingLotId(), request.comments(), request.userType()))
                 .flatMap(log -> ServerResponse.ok().bodyValue(log))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
@@ -26,7 +27,15 @@ public class Handler {
     public Mono<ServerResponse> handleExit(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(AccessRequestDTO.class)
                 .flatMap(request -> accessUseCase.registerExit(request.plate(),
-                        request.parkingLotId()))
+                        request.parkingLotId(), request.comments(), request.userType()))
+                .flatMap(log -> ServerResponse.ok().bodyValue(log))
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
+
+    public Mono<ServerResponse> handleRejection(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(AccessRequestDTO.class)
+                .flatMap(request -> accessUseCase.registerRejection(request.plate(),
+                        request.parkingLotId(), request.comments(), request.userType()))
                 .flatMap(log -> ServerResponse.ok().bodyValue(log))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
@@ -45,17 +54,28 @@ public class Handler {
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 
+    public Mono<ServerResponse> getUserByPlate(ServerRequest serverRequest) {
+        String plate = serverRequest.pathVariable("plate");
+        return accessUseCase.findAuthorizedVehicle(plate)
+                .map(this::toUserDTO)
+                .flatMap(userDTO -> ServerResponse.ok().bodyValue(userDTO))
+                .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
+
     // Vehicle Management
     public Mono<ServerResponse> createVehicle(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(co.edu.sena.model.vehicle.AuthorizedVehicle.class)
+        return serverRequest.bodyToMono(UserDTO.class)
+                .map(this::toAuthorizedVehicle)
                 .flatMap(manageVehiclesUseCase::createVehicle)
-                .flatMap(vehicle -> ServerResponse.ok().bodyValue(vehicle))
+                .flatMap(vehicle -> ServerResponse.ok().bodyValue(toUserDTO(vehicle)))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
     }
 
     public Mono<ServerResponse> getAllVehicles(ServerRequest serverRequest) {
-        return ServerResponse.ok().body(manageVehiclesUseCase.getAllVehicles(),
-                co.edu.sena.model.vehicle.AuthorizedVehicle.class);
+        return ServerResponse.ok().body(
+                manageVehiclesUseCase.getAllVehicles().map(this::toUserDTO),
+                UserDTO.class);
     }
 
     public Mono<ServerResponse> deleteVehicle(ServerRequest serverRequest) {
@@ -71,8 +91,7 @@ public class Handler {
                 .body(accessUseCase.getAllAccessLogs(), co.edu.sena.model.access.AccessLog.class);
     }
 
-    private final co.edu.sena.usecase.parking.ManageParkingLotUseCase manageParkingLotUseCase;
-
+    // Parking Lot Management
     public Mono<ServerResponse> getAllParkingLots(ServerRequest serverRequest) {
         return ServerResponse.ok().body(manageParkingLotUseCase.getAllParkingLots(),
                 co.edu.sena.model.parking.ParkingLot.class);
@@ -93,5 +112,39 @@ public class Handler {
                 .flatMap(manageParkingLotUseCase::createParkingLot)
                 .flatMap(created -> ServerResponse.ok().bodyValue(created))
                 .onErrorResume(e -> ServerResponse.badRequest().bodyValue(e.getMessage()));
+    }
+
+    // Mappers
+    private co.edu.sena.model.vehicle.AuthorizedVehicle toAuthorizedVehicle(UserDTO dto) {
+        return co.edu.sena.model.vehicle.AuthorizedVehicle.builder()
+                .id(dto.id())
+                .plate(dto.placa())
+                .documentType(dto.tipoDocumento())
+                .documentNumber(dto.numeroDocumento())
+                .firstName(dto.nombres())
+                .lastName(dto.apellidos())
+                .vehicleType(dto.tipoVehiculo())
+                .contractType(dto.tipoContrato())
+                .jobTitle(dto.cargo())
+                .email(dto.email())
+                .contact(dto.contacto())
+                .isActive("Activo".equalsIgnoreCase(dto.estado()))
+                .build();
+    }
+
+    private UserDTO toUserDTO(co.edu.sena.model.vehicle.AuthorizedVehicle vehicle) {
+        return new UserDTO(
+                vehicle.getId(),
+                vehicle.getPlate(),
+                vehicle.getVehicleType(),
+                vehicle.getDocumentType(),
+                vehicle.getDocumentNumber(),
+                vehicle.getFirstName(),
+                vehicle.getLastName(),
+                vehicle.getContractType(),
+                vehicle.getJobTitle(),
+                vehicle.getEmail(),
+                vehicle.getContact(),
+                Boolean.TRUE.equals(vehicle.getIsActive()) ? "Activo" : "Inactivo");
     }
 }

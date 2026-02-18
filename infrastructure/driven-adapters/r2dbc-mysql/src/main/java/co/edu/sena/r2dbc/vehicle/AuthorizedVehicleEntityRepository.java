@@ -1,10 +1,13 @@
 package co.edu.sena.r2dbc.vehicle;
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import java.util.UUID;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
 public interface AuthorizedVehicleEntityRepository extends
-        ReactiveCrudRepository<AuthorizedVehicleEntity, String> {
+        R2dbcRepository<AuthorizedVehicleEntity, UUID> {
+
+    Mono<AuthorizedVehicleEntity> findByPlate(String plate);
 
     Mono<Void> deleteByPlate(String plate);
 }
